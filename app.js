@@ -6,6 +6,8 @@
 var express = require('express')
   , routes = require('./routes')
 
+var ArticleProvider = require('./articleprovider-memory').ArticleProvider;
+
 var app = module.exports = express.createServer();
 
 // Configuration
@@ -28,9 +30,18 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
+var articleProvider = new ArticleProvider();
+
 // Routes
 
-app.get('/', routes.index);
+app.get('/', function(req, res){
+	articleProvider.findAll(function(error, docs){
+		res.render('index.jade', { locals: {
+			title: 'Blog',
+			articles: docs
+		}});
+	});
+});
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
